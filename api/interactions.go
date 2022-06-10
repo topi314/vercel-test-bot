@@ -17,7 +17,7 @@ var handlers = []func(interaction discord.ApplicationCommandInteraction) discord
 	commands.PingCommandHandler,
 }
 
-func Handler(w http.ResponseWriter, r *http.Request) {
+func HandleInteractions(w http.ResponseWriter, r *http.Request) {
 	publicKey, err := hex.DecodeString(PublicKey)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
