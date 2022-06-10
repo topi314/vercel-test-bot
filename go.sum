@@ -1,0 +1,8 @@
+github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
+github.com/disgoorg/disgo v0.12.4-0.20220610163347-c706efbe03e7 h1:gAZBzFR0BaSOmDTZGUbcfHGDO1qjeKdHeZ4gitr1qRU=
+github.com/disgoorg/disgo v0.12.4-0.20220610163347-c706efbe03e7/go.mod h1:Cyip4bCYHD3rHgDhBPT9cLo81e9AMbDe8ocM50UNRM4=
+github.com/disgoorg/snowflake/v2 v2.0.0 h1:+xvyyDddXmXLHmiG8SZiQ3sdZdZPbUR22fSHoqwkrOA=
+github.com/disgoorg/snowflake/v2 v2.0.0/go.mod h1:SPU9c2CNn5DSyb86QcKtdZgix9osEtKrHLW4rMhfLCs=
+github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
+github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
+gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c h1:dUUwHk2QECo/6vqA44rthZ8ie2QXMNeKRTHCNY2nXvo=
