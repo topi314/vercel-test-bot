@@ -24,6 +24,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	println("Public key: " + string(publicKey))
+
 	if !httpserver.VerifyRequest(r, publicKey) {
 		http.Error(w, "Invalid signature", http.StatusUnauthorized)
 		return
