@@ -2,55 +2,51 @@ package api
 
 import (
 	"encoding/hex"
+	"fmt"
 	"net/http"
 	"os"
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/httpserver"
-	"github.com/disgoorg/disgo/json"
+	"github.com/disgoorg/log"
 	"vercel-test-bot/commands"
 )
 
-var PublicKey = os.Getenv("PUBLIC_KEY")
-
-var handlers = []func(interaction discord.ApplicationCommandInteraction) discord.InteractionResponse{
-	commands.PingCommandHandler,
+var handlers = map[string]func(interaction discord.ApplicationCommandInteraction, done func()) discord.InteractionResponse{
+	"ping": commands.PingCommandHandler,
 }
 
 func HandleInteractions(w http.ResponseWriter, r *http.Request) {
-	publicKey, err := hex.DecodeString(PublicKey)
+	logger := log.Default()
+	logger.SetLevel(log.LevelTrace)
+	logger.Infof("Received interaction request: %s", r.URL.Path)
+	publicKey, err := hex.DecodeString(os.Getenv("PUBLIC_KEY"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	var done chan struct{}
+	httpserver.HandleInteraction(publicKey, logger, func(respondFunc httpserver.RespondFunc, event httpserver.EventInteractionCreate) {
+		switch i := event.Interaction.(type) {
+		case discord.PingInteraction:
+			err = respondFunc(discord.InteractionResponse{
+				Type: discord.InteractionResponseTypePong,
+			})
 
-	println("Public key: " + string(publicKey))
-
-	if !httpserver.VerifyRequest(r, publicKey) {
-		http.Error(w, "Invalid signature", http.StatusUnauthorized)
-		return
-	}
-
-	var interaction discord.UnmarshalInteraction
-	if err = json.NewDecoder(r.Body).Decode(&interaction); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	}
-
-	var response discord.InteractionResponse
-	switch i := interaction.Interaction.(type) {
-	case discord.PingInteraction:
-		response = discord.InteractionResponse{
-			Type: discord.InteractionCallbackTypePong,
+		case discord.ApplicationCommandInteraction:
+			done = make(chan struct{}, 1)
+			handler, ok := handlers[i.Data.CommandName()]
+			if !ok {
+				err = fmt.Errorf("command %s not implemented", i.Data.CommandName())
+				break
+			}
+			err = respondFunc(handler(i, func() { done <- struct{}{} }))
 		}
-
-	case discord.ApplicationCommandInteraction:
-		for _, handler := range handlers {
-			response = handler(i)
-			break
+		if err != nil {
+			logger.Errorf("error while handling interaction: %s", err)
 		}
-	}
-
-	if err = json.NewEncoder(w).Encode(response); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	})(w, r)
+	if done != nil {
+		<-done
 	}
 }
